@@ -14,4 +14,11 @@ add_executable(hibiscus ${SRC_FILES})
 enable_testing()
 add_subdirectory("tests")
 
-#target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/source")
+target_include_directories(${PROJECT_NAME} PUBLIC 
+    "${CMAKE_SOURCE_DIR}/ThirdParty/include"
+)
+
+target_link_directories(${PROJECT_NAME} PUBLIC 
+    "${CMAKE_SOURCE_DIR}/ThirdParty/libs/yaml-cpp"
+)
+
