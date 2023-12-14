@@ -3,8 +3,7 @@
 
 #include <filesystem>
 
-struct FileChunk
-{
+struct FileChunk {
     std::string file_name;
     size_t timestamp;
 };

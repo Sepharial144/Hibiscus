@@ -3,9 +3,9 @@
 
 #include "Hibicus_definitions.hpp"
 
+#include <cstdint>
 #include <list>
 #include <string>
-#include <cstdint>
 
 namespace hibiscus::algo {
 
@@ -14,6 +14,6 @@ void extractFileName(const std::string& source, std::string& dest);
 void updateList(std::list<FileChunk> list, const FileChunk& file_chunk);
 void removeFromList(std::list<FileChunk> list, const std::string& file_name);
 
-} // hibiscus::algo
+} // namespace hibiscus::algo
 
 #endif // !_HIBISCUS_ALGORITHM_HPP_

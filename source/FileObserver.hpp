@@ -3,21 +3,20 @@
 
 #include "Hibicus_definitions.hpp"
 
-#include <thread>
 #include <mutex>
+#include <thread>
 
 #include <filesystem>
+#include <functional>
 #include <list>
 #include <string>
-#include <functional>
 
-class FileObserver
-{
+class FileObserver {
 public:
     explicit FileObserver();
     explicit FileObserver(std::filesystem::path config_path);
     ~FileObserver();
-    //void getListFiles(std::vector<std::string>& res_container);
+    // void getListFiles(std::vector<std::string>& res_container);
     void start();
 
 private:

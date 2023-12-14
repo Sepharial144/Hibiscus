@@ -4,8 +4,8 @@
 
 int main(int argc, char* argv[])
 {
-	std::cout << "Start" << std::endl;
-	FileObserver FileObserver{"/workspaces/Hibiscus/data"};
-	FileObserver.start();
-	return 0;
+    std::cout << "Start" << std::endl;
+    FileObserver FileObserver { "/workspaces/Hibiscus/data" };
+    FileObserver.start();
+    return 0;
 }
