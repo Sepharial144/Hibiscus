@@ -6,7 +6,7 @@
 struct FileChunk
 {
     std::string file_name;
-    std::filesystem::file_time_type last_write_time;
+    size_t timestamp;
 };
 
 #endif // !HIBICUS_DEFINITIONS_HPP_

@@ -1,12 +1,12 @@
 #include "FileObserver.hpp"
+#include "Algorithm.hpp"
 
 #include <chrono>
 #include <iostream>
 
 FileObserver::FileObserver() {}
-FileObserver::FileObserver(std::filesystem::path config_path, std::function<bool(std::string&)> filter)
+FileObserver::FileObserver(std::filesystem::path config_path)
     : m_configPath{ config_path }
-    , m_filter{ filter }
 {
 }
 
@@ -35,38 +35,28 @@ void FileObserver::start()
 
 void FileObserver::observeDirectory()
 {
-    std::vector<FileChunk> rawFilesList(100);
     isRunning = true;
     while(isRunning)
     {
         std::this_thread::sleep_for(std::chrono::seconds(5));
         m_mtx.lock();
-        rawFilesList.clear();
+
         for (const auto& entry : std::filesystem::directory_iterator(m_configPath))
         {
             std::string file{ entry.path() };
 
-            if(fileFilter(file))
-                rawFilesList.push_back({file, std::filesystem::last_write_time(entry.path())});
+            int64_t position = hibiscus::algo::fileFilter(file);
+            if(position == 0)
+            {
+                auto ftime = std::filesystem::last_write_time(entry.path());
+                size_t timestamp = std::chrono::duration_cast<std::chrono::seconds>(ftime.time_since_epoch()).count();
+                FileChunk fileChunk = FileChunk{file, timestamp};
+                hibiscus::algo::updateList(m_fileList, fileChunk);
+                continue;
+            }
+            if(position > 0)
+                hibiscus::algo::removeFromList(m_fileList, file);
         }
-
-        // TODO: make algorothm filter better
-        m_fileList.clear();
-
-        // TODO: create filter by timestamp
         m_mtx.unlock();
     }
 }
-
- bool FileObserver::fileFilter(const std::string& line)
- {
-    const size_t position = line.rfind('/');
-    const std::string fileName = line.substr(position + 1, line.size());
-        
-    if (fileName.rfind(".yaml") == std::string::npos)
-        return false;
-    const char letter = fileName[0];
-    if (letter == '#' || letter == '!')
-        return false;   
-    return true; 
- }
