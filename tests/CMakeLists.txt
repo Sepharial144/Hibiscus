@@ -1,11 +1,32 @@
-﻿find_package(GTest REQUIRED)
+﻿find_package(GTest CONFIG REQUIRED)
+enable_testing()
+message(STATUS "Test framework: ${GTest}")
 
-set(TARGET ${PROJECT_NAME}-unit)
+file(GLOB_RECURSE UNIT_SRC_FILES "unit/*.hpp" "unit/*.cpp")
+#file(GLOB_RECURSE API_SRC_FILES "api/*.hpp" "api/*.cpp")
 
-file(GLOB_RECURSE TEST_SRC_FILES "unit/*.hpp" "unit/*.cpp")
+function(add_custom_test nameTest srcFiles)
+    set(EXECUTION_TEST_FILE ${PROJECT_NAME}-${nameTest}-test)
+	set(NAME_TEST ${PROJECT_NAME}-${nameTest}-gtest)
+	add_executable(${EXECUTION_TEST_FILE} ${srcFiles} ${SOURCE_DEPENDENCIES})
+	target_link_libraries(${EXECUTION_TEST_FILE} PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main)
+	#target_link_libraries(${EXECUTION_TEST_FILE} PUBLIC GTest::GTest GTest::Main)
+	target_include_directories(${EXECUTION_TEST_FILE} PUBLIC "${CMAKE_SOURCE_DIR}/source")
+	add_test(${NAME_TEST} ${EXECUTION_TEST_FILE})
+endfunction()
 
-add_executable(${TARGET} ${TEST_SRC_FILES} ${HTTPXX_SOURCE_FILES})
+add_custom_test(unit ${UNIT_SRC_FILES})
 
-target_link_libraries(${TARGET} PUBLIC GTest::GTest GTest::Main)
 
-target_include_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/source")
+#find_package(GTest CONFIG REQUIRED)
+#enable_testing()
+
+#set(TARGET ${PROJECT_NAME}-unit)
+
+#file(GLOB_RECURSE TEST_SRC_FILES "unit/*.hpp" "unit/*.cpp")
+
+#add_executable(${PROJECT_NAME}-unit ${TEST_SRC_FILES} ${HIBISCUS_SRC_FILES})
+
+#target_link_libraries(${PROJECT_NAME}-unit PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main)
+
+#target_include_directories(${PROJECT_NAME}-unit PUBLIC "${CMAKE_SOURCE_DIR}/source")
