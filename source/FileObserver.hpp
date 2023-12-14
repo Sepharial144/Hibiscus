@@ -6,26 +6,36 @@
 #include <mutex>
 #include <thread>
 
+#include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <list>
 #include <string>
+#include <string_view>
+
+enum enumFileFilter : int64_t {
+    INVALID_FILE = -1,
+    COMMENTED_FILE = 0
+};
 
 class FileObserver {
 public:
     explicit FileObserver();
-    explicit FileObserver(std::filesystem::path config_path);
+    explicit FileObserver(std::filesystem::path config_path, uint64_t wait_millisec);
     ~FileObserver();
     // void getListFiles(std::vector<std::string>& res_container);
     void start();
 
 private:
     void observeDirectory();
+    int64_t fileFilter(const std::string_view& file_path);
 
 private:
     bool isRunning = false;
+    enumObserverStatus m_status;
     std::filesystem::path m_configPath;
-    std::list<FileChunk> m_fileList;
+    uint64_t m_milliseconds;
+    std::list<ProjectInfo> m_projectList;
 
     std::thread m_mainLoop;
     std::mutex m_mtx;
