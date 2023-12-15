@@ -13,11 +13,6 @@
 #include <string>
 #include <string_view>
 
-enum enumFileFilter : int64_t {
-    INVALID_FILE = -1,
-    COMMENTED_FILE = 0
-};
-
 class FileObserver {
 public:
     explicit FileObserver();
@@ -25,6 +20,7 @@ public:
     ~FileObserver();
     // void getListFiles(std::vector<std::string>& res_container);
     void start();
+    void stop();
 
 private:
     void observeDirectory();

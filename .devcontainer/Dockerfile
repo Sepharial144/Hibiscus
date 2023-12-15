@@ -11,7 +11,8 @@ RUN apk update \
     ninja \
     ccache \
     gtest-dev \
-    python3
+    python3 \
+    fmt-dev
 
 RUN ln -sf /usr/bin/clang /usr/bin/cc \
   && ln -sf /usr/bin/clang++ /usr/bin/c++ \

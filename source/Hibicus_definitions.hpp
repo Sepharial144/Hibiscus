@@ -1,15 +1,20 @@
-#ifndef HIBICUS_DEFINITIONS_HPP_
-#define HIBICUS_DEFINITIONS_HPP_
+#ifndef _HIBICUS_DEFINITIONS_HPP_
+#define _HIBICUS_DEFINITIONS_HPP_
 
 #include <cstdint>
 #include <filesystem>
 #include <string>
 
+enum enumFileFilter : int64_t {
+    INVALID_FILE = -1,
+    COMMENTED_FILE = 0
+};
+
 enum class enumObserverStatus {
     initialization,
     active,
     running
-}
+};
 
 struct ProjectInfo {
     std::string path;
@@ -23,4 +28,4 @@ struct FileChunk {
     size_t timestamp;
 };
 
-#endif // !HIBICUS_DEFINITIONS_HPP_
+#endif // !_HIBICUS_DEFINITIONS_HPP_

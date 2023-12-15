@@ -33,6 +33,14 @@ void FileObserver::start()
     m_mainLoop = std::thread(&FileObserver::observeDirectory, this);
 }
 
+void FileObserver::stop()
+{
+    isRunning = false;
+    if (m_mainLoop.joinable())
+        m_mainLoop.join();
+}
+
+// TODO: add isRunning variable into all condition statement to check loop status
 void FileObserver::observeDirectory()
 {
     isRunning = true;
@@ -84,7 +92,6 @@ void FileObserver::observeDirectory()
         }
     }
     m_mtx.unlock();
-}
 }
 
 // TODO: make it faster, not critical, rewrite the function
