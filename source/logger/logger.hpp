@@ -9,7 +9,8 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <fmt/printf.h>
-#include <fmt/std.h>
+#include <fmt/ranges.h>
+//#include <fmt/std.h>
 
 namespace logger {
 template <typename... Args>

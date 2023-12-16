@@ -3,29 +3,25 @@
 
 #include "Hibicus_definitions.hpp"
 
-#include <list>
 #include <filesystem>
+#include <list>
 
-class FolderInformation
-{
-    private:
-        struct FileInfo
-        {
-            std::filesystem::path;
-            uint64_t create_timestamp;
-            uint64_t change_timestamp;
-        };
+class FolderInformation {
+public:
+    explicit FolderInformation();
+    explicit FolderInformation(const std::filesystem::path path, const std::list<FileInfo>& listFiles);
+    ~FolderInformation();
 
-    public:
-        explicit FolderInformation();
-        ~FolderInformation();
+    void setFolderInformation(std::list<FileInfo>& list_files);
+    void setRootFolder(const std::filesystem::path path);
 
-        std::filesystem::path getRootFolder();
-        void upateFileInformation(std::filesystem::path);
+    const size_t size() const;
+    std::filesystem::path getRootFolder() const;
+    std::list<FileInfo>& getFolderFileList() const;
 
-    private:
-        std::filesystem::path m_rootFolder;
-        std::list<FileInfo> m_listFileInfo;
-}
+private:
+    std::filesystem::path m_rootFolder;
+    std::list<FileInfo> m_listFileInfo;
+};
 
 #endif // !_HIBISCUS_FOLDER_INFORMATION_HPP_

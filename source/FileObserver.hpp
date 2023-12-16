@@ -13,6 +13,8 @@
 #include <string>
 #include <string_view>
 
+class FolderInformation;
+
 class FileObserver {
 public:
     explicit FileObserver();
@@ -25,13 +27,17 @@ public:
 private:
     void observeDirectory();
     int64_t fileFilter(const std::string_view& file_path);
+    size_t countFilesInFolder(std::filesystem::path path);
+    FolderInformation* findFolderInformation(std::filesystem::path root_folder);
+    void updateProjectInformation(const std::filesystem::path path, std::list<FileInfo>& file_list);
 
 private:
     bool isRunning = false;
     enumObserverStatus m_status;
+    enumObserverStatus m_lastStatus;
     std::filesystem::path m_configPath;
     uint64_t m_milliseconds;
-    std::list<ProjectInfo> m_projectList;
+    std::list<FolderInformation> m_projectList;
 
     std::thread m_mainLoop;
     std::mutex m_mtx;

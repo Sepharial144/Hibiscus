@@ -16,11 +16,9 @@ enum class enumObserverStatus {
     running
 };
 
-struct ProjectInfo {
-    std::string path;
-    size_t start_time;
-    size_t last_time;
-    size_t delay_time;
+struct FileInfo {
+    std::filesystem::path path;
+    std::filesystem::file_time_type last_time;
 };
 
 struct FileChunk {
