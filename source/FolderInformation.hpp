@@ -17,7 +17,7 @@ public:
 
     const size_t size() const;
     std::filesystem::path getRootFolder() const;
-    std::list<FileInfo>& getFolderFileList() const;
+    const std::list<FileInfo>& getFolderFileList() const;
 
 private:
     std::filesystem::path m_rootFolder;

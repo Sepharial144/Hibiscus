@@ -55,12 +55,12 @@ void FileObserver::observeDirectory()
             logger::info("File observer observe directory ... initialization");
             for (const auto& projectPath : std::filesystem::directory_iterator(m_configPath)) {
                 // list of projects is empty, need initialization
-                size_t countFiles  = countFilesInFolder(projectPath);
+                size_t countFiles = countFilesInFolder(projectPath);
                 std::list<FileInfo> listFiles(countFiles);
 
                 for (const auto& projectFile : std::filesystem::directory_iterator(projectPath.path())) {
                     logger::debug("   -- ", projectPath.path());
-                    listFiles.emplace_back(FileInfo{ projectFile,  std::filesystem::last_write_time(projectFile)});
+                    listFiles.emplace_back(FileInfo { projectFile, std::filesystem::last_write_time(projectFile) });
                 }
 
                 logger::debug("Count of files ... ", listFiles.size());
@@ -163,8 +163,7 @@ FolderInformation* FileObserver::findFolderInformation(std::filesystem::path pat
     };
 
     auto end = m_projectList.end();
-    if (auto it = std::find_if(m_projectList.begin(), end, folderIsFound); it != end)
-    {
+    if (auto it = std::find_if(m_projectList.begin(), end, folderIsFound); it != end) {
         logger::info("File observer find folder information ... found");
         return &(*it);
     }
@@ -176,13 +175,12 @@ void FileObserver::updateProjectInformation(const std::filesystem::path path, st
 {
     logger::info("File observer update project information ...");
     auto pFolderInformation = findFolderInformation(path);
-    if (pFolderInformation != nullptr)
-    {
+    if (pFolderInformation != nullptr) {
         pFolderInformation->setFolderInformation(file_list);
         logger::info("File observer update project information ... complete");
         return;
     }
-    
-    m_projectList.emplace_back(FolderInformation{path, file_list});
+
+    m_projectList.emplace_back(FolderInformation { path, file_list });
     logger::info("File observer update project information ... complete");
 }
