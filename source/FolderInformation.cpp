@@ -10,7 +10,7 @@ FolderInformation::~FolderInformation()
 
 FolderInformation::FolderInformation(const std::filesystem::path path, const std::list<FileInfo>& listFiles)
     : m_rootFolder { path }
-    , m_listFileInfo { listFiles }
+    , m_listFileInfo { std::move(listFiles) }
 {
 }
 

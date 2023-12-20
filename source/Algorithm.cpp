@@ -39,4 +39,17 @@ void removeFromList(std::list<FileChunk> list, const std::string& file_name)
         [&](FileChunk& chunk) { return chunk.file_name == file_name; });
 }
 
+std::string to_string(const std::filesystem::file_time_type& ftime)
+{
+#if __cpp_lib_format
+    return std::format("{:%c}", ftime);
+#else
+    std::time_t cftime = std::chrono::system_clock::to_time_t(
+        std::chrono::file_clock::to_sys(ftime));
+    std::string str = std::asctime(std::localtime(&cftime));
+    str.pop_back(); // rm the trailing '\n' put by `asctime`
+    return str;
+#endif
+}
+
 } // namespace hibiscus::algo

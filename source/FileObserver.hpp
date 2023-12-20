@@ -26,6 +26,9 @@ public:
 
 private:
     void observeDirectory();
+    void initializationDirectory();
+    void runningDirectory();
+
     int64_t fileFilter(const std::string_view& file_path);
     size_t countFilesInFolder(std::filesystem::path path);
     FolderInformation* findFolderInformation(std::filesystem::path root_folder);
