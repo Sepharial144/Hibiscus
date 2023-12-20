@@ -6,13 +6,11 @@ RUN apk update \
     clang \
     clang-dev \
     alpine-sdk \
-    dpkg \
     cmake \
     ninja \
     ccache \
     gtest-dev \
     python3 \
-    fmt-dev
 
 RUN ln -sf /usr/bin/clang /usr/bin/cc \
   && ln -sf /usr/bin/clang++ /usr/bin/c++ \

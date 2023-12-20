@@ -50,32 +50,32 @@ void FileObserver::observeDirectory()
     while (isRunning) {
         std::this_thread::sleep_for(std::chrono::milliseconds(m_milliseconds));
         m_mtx.lock();
-        logger::info("File observer observe directory ...");
-        if (m_status == enumObserverStatus::initialization) {
-            logger::info("File observer observe directory ... initialization");
+        // logger::info("File observer observe directory ...");
+        if (m_status == enumObserverStatus::initialization && m_lastStatus == enumObserverStatus::initialization) {
+            // logger::info("File observer observe directory ... initialization");
             for (const auto& projectPath : std::filesystem::directory_iterator(m_configPath)) {
                 // list of projects is empty, need initialization
                 size_t countFiles = countFilesInFolder(projectPath);
                 std::list<FileInfo> listFiles(countFiles);
 
                 for (const auto& projectFile : std::filesystem::directory_iterator(projectPath.path())) {
-                    logger::debug("   -- ", projectPath.path());
+                    // logger::debug("   -- {} {}", projectFile.path(), hibiscus::algo::time_to_string(projectFile));
                     listFiles.emplace_back(FileInfo { projectFile, std::filesystem::last_write_time(projectFile) });
                 }
 
-                logger::debug("Count of files ... ", listFiles.size());
+                // logger::debug("Count of files ... ", listFiles.size());
                 m_status = enumObserverStatus::running;
-                logger::info("File observer observe directory ... initialization complete");
-                continue;
+                // logger::info("File observer observe directory ... initialization complete");
+                break;
             }
         }
 
         if (m_status == enumObserverStatus::running) {
-            logger::info("File observer observe directory ... running");
+            // logger::info("File observer observe directory ... running");
             for (const auto& projectPath : std::filesystem::directory_iterator(m_configPath)) {
                 // list of projects is empty, need initialization
                 for (const auto& projectFile : std::filesystem::directory_iterator(projectPath.path())) {
-                    logger::info("File observer observe directory ... check ", projectPath.path());
+                    // logger::info("File observer observe directory ... check ", projectPath.path());
                 }
                 continue;
             }
@@ -95,7 +95,7 @@ void FileObserver::observeDirectory()
         }
             for (const auto& projectFile : std::filesystem::directory_iterator(projectPath.path())) {
                 std::cout << projectFile.path() << std::endl;
-                
+
             const std::string_view filePath { projectPath.path() };
 
             int64_t position = fileFilter(filePath);
@@ -131,31 +131,31 @@ void FileObserver::observeDirectory()
 // TODO: make it faster, not critical, rewrite the function
 int64_t FileObserver::fileFilter(const std::string_view& file_path)
 {
-    logger::info("File observer file filter ...");
+    // logger::info("File observer file filter ...");
     if (file_path.rfind(".toml") == std::string_view::npos)
         return enumFileFilter::INVALID_FILE;
 
-    logger::info("File observer file filter valid file ...");
+    // logger::info("File observer file filter valid file ...");
     const size_t position = file_path.rfind('/');
     const char letter = file_path[position + 1];
     if (letter == '#' || letter == '!') // is it really necessary to use '!'?
         return enumFileFilter::COMMENTED_FILE;
 
-    logger::info("File observer file filter valid file ... complete");
+    // logger::info("File observer file filter valid file ... complete");
     return position;
 }
 
 size_t FileObserver::countFilesInFolder(std::filesystem::path path)
 {
-    logger::info("File observer count files in folder", path.c_str(), " ...");
+    // logger::info("File observer count files in folder", path.c_str(), " ...");
     using std::filesystem::directory_iterator;
-    logger::info("File observer count files in folder ... complete");
+    // logger::info("File observer count files in folder ... complete");
     return std::distance(directory_iterator(path), directory_iterator {});
 }
 
 FolderInformation* FileObserver::findFolderInformation(std::filesystem::path path)
 {
-    logger::info("File observer find folder information ...");
+    // logger::info("File observer find folder information ...");
     auto folderIsFound = [&](const FolderInformation& folderInfo) {
         if (folderInfo.getRootFolder().compare(path) == 0)
             return true;
@@ -164,23 +164,23 @@ FolderInformation* FileObserver::findFolderInformation(std::filesystem::path pat
 
     auto end = m_projectList.end();
     if (auto it = std::find_if(m_projectList.begin(), end, folderIsFound); it != end) {
-        logger::info("File observer find folder information ... found");
+        // logger::info("File observer find folder information ... found");
         return &(*it);
     }
-    logger::info("File observer find folder information ... not found");
+    // logger::info("File observer find folder information ... not found");
     return nullptr;
 }
 
 void FileObserver::updateProjectInformation(const std::filesystem::path path, std::list<FileInfo>& file_list)
 {
-    logger::info("File observer update project information ...");
+    // logger::info("File observer update project information ...");
     auto pFolderInformation = findFolderInformation(path);
     if (pFolderInformation != nullptr) {
         pFolderInformation->setFolderInformation(file_list);
-        logger::info("File observer update project information ... complete");
+        // logger::info("File observer update project information ... complete");
         return;
     }
 
     m_projectList.emplace_back(FolderInformation { path, file_list });
-    logger::info("File observer update project information ... complete");
+    // logger::info("File observer update project information ... complete");
 }
