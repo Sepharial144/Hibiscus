@@ -2,6 +2,7 @@
 #define _HIBISCUS_FILE_OBSERVER_HPP_
 
 #include "Hibicus_definitions.hpp"
+#include "DirectoryStorage.hpp"
 
 #include <mutex>
 #include <thread>
@@ -15,12 +16,12 @@
 
 class FolderInformation;
 
-class FileObserver {
+class FileObserver : virtual public DirectoryStorage {
 public:
     explicit FileObserver();
     explicit FileObserver(std::filesystem::path config_path, uint64_t wait_millisec);
     ~FileObserver();
-    // void getListFiles(std::vector<std::string>& res_container);
+
     void start();
     void stop();
 
@@ -31,19 +32,13 @@ private:
 
     int64_t fileFilter(const std::string_view& file_path);
     size_t countFilesInFolder(std::filesystem::path path);
-    FolderInformation* findFolderInformation(std::filesystem::path root_folder);
-    void updateProjectInformation(const std::filesystem::path path, std::list<FileInfo>& file_list);
 
 private:
     bool isRunning = false;
     enumObserverStatus m_status;
     enumObserverStatus m_lastStatus;
-    std::filesystem::path m_configPath;
     uint64_t m_milliseconds;
-    std::list<FolderInformation> m_projectList;
-
     std::thread m_mainLoop;
-    std::mutex m_mtx;
 };
 
 #endif // !_HIBISCUS_FILE_OBSERVER_HPP_

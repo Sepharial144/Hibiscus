@@ -5,9 +5,9 @@
 
 FileObserver::FileObserver() { }
 FileObserver::FileObserver(std::filesystem::path config_path, uint64_t wait_millisec)
-    : m_status { enumObserverStatus::initialization }
+    : DirectoryStorage { config_path }
+    , m_status { enumObserverStatus::initialization }
     , m_lastStatus { enumObserverStatus::initialization }
-    , m_configPath { config_path }
     , m_milliseconds { wait_millisec }
 {
 }
@@ -59,13 +59,16 @@ void FileObserver::observeDirectory()
 
 void FileObserver::initializationDirectory()
 {
+    using filesystem_iteraror = std::filesystem::directory_iterator;
+
     logger::info("File observer observe directory ... initialization");
-    for (const auto& projectPath : std::filesystem::directory_iterator(m_configPath)) {
+    for (const auto& projectEntry : filesystem_iteraror(DirectoryStorage::configPath())) {
 
-        size_t countFiles = countFilesInFolder(projectPath);
-        std::list<FileInfo> listFiles(countFiles);
+        size_t count = DirectoryStorage::countFilesInFolder(projectEntry);
+        std::list<FileInfo> listFiles(count);
 
-        for (const auto& projectFile : std::filesystem::directory_iterator(projectPath.path())) {
+        logger::debug("File observer: inspecting {}", projectEntry.path().c_str());
+        for (const auto& projectFile : filesystem_iteraror(projectEntry.path())) {
             int64_t filter = fileFilter(projectFile.path().c_str());
 
             if (filter) {
@@ -74,7 +77,7 @@ void FileObserver::initializationDirectory()
                     projectFile.path().c_str(),
                     ftime,
                     " valid");
-                listFiles.emplace_back(FileInfo { projectFile, ftime});
+                listFiles.emplace_back(FileInfo { projectFile, ftime });
                 continue;
             }
 
@@ -90,22 +93,39 @@ void FileObserver::initializationDirectory()
                     std::filesystem::last_write_time(projectFile),
                     " commented");
         }
-        logger::info("File observer write project information ... {}", projectPath.path().c_str());
-        const std::lock_guard<std::mutex> lock(m_mtx);
-        m_projectList.emplace_back(FolderInformation { projectPath, listFiles });
+        logger::info("File observer write project information ... {}", projectEntry.path().c_str());
+        DirectoryStorage::emplace_back(FolderInformation { projectEntry, listFiles });
         logger::info("File observer write project information ... complete");
     }
-    logger::debug("File observer count of projects ... {}", m_projectList.size());
+    logger::debug("File observer count of projects ... {}", DirectoryStorage::size());
     m_status = enumObserverStatus::running;
     logger::info("File observer observe directory ... initialization complete");
 }
 
+// TODO: need refactoring
 void FileObserver::runningDirectory()
 {
+    using filesystem_iteraror = std::filesystem::directory_iterator;
+
     logger::info("File observer observe directory ... running");
 
     logger::info("File observer observe directory count of folders ...");
-    auto isFoldersListsDifferent = (m_projectList.size() != countFilesInFolder(m_configPath)) ? true : false;
+    const auto [size, count] = DirectoryStorage::sizeAndCount();
+    if (size == count)
+    {
+        logger::info("File observer observe directory count of folders ... equal");
+    }
+    if (size > count)
+    {
+        logger::info("File observer observe directory count of folders ... less");
+
+    }
+    if (size < count)
+    {
+        logger::info("File observer observe directory count of folders ... greater");
+    }
+    /*
+    auto isFoldersListsDifferent = (DirectoryStorage::size() != DirectoryStorage::countFilesInFolder(m_configPath)) ? true : false;
     if (isFoldersListsDifferent) {
         logger::info("File observer observe directory count of folders ... different");
         // todo differenciation of folders
@@ -114,12 +134,13 @@ void FileObserver::runningDirectory()
 
     logger::info("File observer observe directory count of folders ... same");
 
-    for (const auto& projectPath : std::filesystem::directory_iterator(m_configPath)) {
+    for (const auto& projectEntry : filesystem_iteraror(DirectoryStorage::configPath())) {
+
         // list of projects is empty, need initialization
-        size_t countFiles = countFilesInFolder(projectPath);
+        size_t countFiles = DirectoryStorage::countFilesInFolder(projectEntry);
         std::list<FileInfo> listFiles(countFiles);
 
-        for (const auto& projectFile : std::filesystem::directory_iterator(projectPath.path())) {
+        for (const auto& projectFile : filesystem_iteraror(projectEntry.path())) {
             std::cout << projectFile.path() << " " << std::filesystem::last_write_time(projectFile) << std::endl;
 
             logger::warning("File observer check file ...");
@@ -142,62 +163,19 @@ void FileObserver::runningDirectory()
         m_status = enumObserverStatus::running;
         logger::info("File observer observe directory ... initialization complete");
     }
+    */
 }
 
 // TODO: make it faster, not critical, rewrite the function
 int64_t FileObserver::fileFilter(const std::string_view& file_path)
 {
-    logger::info("File observer file filter ...");
     if (file_path.rfind(".toml") == std::string_view::npos)
         return enumFileFilter::INVALID_FILE;
 
-    logger::info("File observer file filter valid file ...");
     const size_t position = file_path.rfind('/');
     const char letter = file_path[position + 1];
     if (letter == '#' || letter == '!') // is it really necessary to use '!'?
         return enumFileFilter::COMMENTED_FILE;
 
-    logger::info("File observer file filter valid file ... complete");
     return position;
-}
-
-size_t FileObserver::countFilesInFolder(std::filesystem::path path)
-{
-    logger::info("File observer count files in folder", path.c_str(), " ...");
-    using std::filesystem::directory_iterator;
-    auto distance = std::distance(directory_iterator(path), directory_iterator {});
-    logger::info("File observer count files in folder ... complete: {}", distance);
-    return distance;
-}
-
-FolderInformation* FileObserver::findFolderInformation(std::filesystem::path path)
-{
-    logger::info("File observer find folder information ...");
-    auto folderIsFound = [&](const FolderInformation& folderInfo) {
-        if (folderInfo.getRootFolder().compare(path) == 0)
-            return true;
-        return false;
-    };
-
-    auto end = m_projectList.end();
-    if (auto it = std::find_if(m_projectList.begin(), end, folderIsFound); it != end) {
-        logger::info("File observer find folder information ... found");
-        return &(*it);
-    }
-    logger::info("File observer find folder information ... not found");
-    return nullptr;
-}
-
-void FileObserver::updateProjectInformation(const std::filesystem::path path, std::list<FileInfo>& file_list)
-{
-    logger::info("File observer update project information ...");
-    auto pFolderInformation = findFolderInformation(path);
-    if (pFolderInformation != nullptr) {
-        pFolderInformation->setFolderInformation(file_list);
-        logger::info("File observer update project information ... complete");
-        return;
-    }
-
-    m_projectList.emplace_back(FolderInformation { path, file_list });
-    logger::info("File observer update project information ... complete");
 }
