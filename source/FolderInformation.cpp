@@ -29,6 +29,11 @@ const size_t FolderInformation::size() const
     return m_listFileInfo.size();
 }
 
+const size_t FolderInformation::hash() const
+{
+    return std::filesystem::hash_value(m_rootFolder);
+}
+
 std::filesystem::path FolderInformation::getRootFolder() const
 {
     return m_rootFolder;

@@ -18,12 +18,17 @@ DirectoryStorage::~DirectoryStorage()
 {
 }
 
-std::filesystem::path DirectoryStorage::configPath() const
+auto DirectoryStorage::configPath() const -> std::filesystem::path
 {
     return m_configPath;
 }
 
-size_t DirectoryStorage::size() const
+auto DirectoryStorage::directoryList() const -> const std::list<FolderInformation>&
+{
+    return m_projectList;
+}
+
+auto DirectoryStorage::size() const -> size_t
 {
     return m_projectList.size();
 }
@@ -34,7 +39,14 @@ void DirectoryStorage::emplace_back(const FolderInformation&& folder_info)
     m_projectList.emplace_back(folder_info);
 }
 
-size_t DirectoryStorage::countFilesInFolder(std::filesystem::path path) const
+void DirectoryStorage::removeByHash(const size_t hash)
+{
+    std::remove_if(m_projectList.begin(), m_projectList.end(), [&](const FolderInformation& folder_info) {
+        return folder_info.hash() == hash;
+    });
+}
+
+auto DirectoryStorage::countFilesInFolder(std::filesystem::path path) const -> size_t
 {
     logger::info("Directory storage count files in folder", path.c_str(), " ...");
     using std::filesystem::directory_iterator;
@@ -45,10 +57,10 @@ size_t DirectoryStorage::countFilesInFolder(std::filesystem::path path) const
 
 auto DirectoryStorage::sizeAndCount() const -> std::tuple<size_t, size_t>
 {
-    return {m_projectList.size(), countFilesInFolder(m_configPath)};
+    return { m_projectList.size(), countFilesInFolder(m_configPath) };
 }
 
-FolderInformation* DirectoryStorage::findFolderInformation(std::filesystem::path path)
+auto DirectoryStorage::findFolderInformation(std::filesystem::path path) -> FolderInformation*
 {
     logger::info("Directory storage find folder information ...");
     auto folderIsFound = [&](const FolderInformation& folderInfo) {

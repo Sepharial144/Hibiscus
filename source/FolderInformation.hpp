@@ -16,6 +16,7 @@ public:
     void setRootFolder(const std::filesystem::path path);
 
     const size_t size() const;
+    const size_t hash() const;
     std::filesystem::path getRootFolder() const;
     const std::list<FileInfo>& getFolderFileList() const;
 

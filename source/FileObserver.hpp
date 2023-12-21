@@ -1,8 +1,8 @@
 #ifndef _HIBISCUS_FILE_OBSERVER_HPP_
 #define _HIBISCUS_FILE_OBSERVER_HPP_
 
-#include "Hibicus_definitions.hpp"
 #include "DirectoryStorage.hpp"
+#include "Hibicus_definitions.hpp"
 
 #include <mutex>
 #include <thread>
@@ -30,6 +30,7 @@ private:
     void initializationDirectory();
     void runningDirectory();
 
+    std::list<FileInfo> createFolderList(std::filesystem::path project_path);
     int64_t fileFilter(const std::string_view& file_path);
     size_t countFilesInFolder(std::filesystem::path path);
 

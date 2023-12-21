@@ -3,6 +3,9 @@
 #include "FolderInformation.hpp"
 #include "logger/logger.hpp"
 
+#include <cmath>
+#include <vector>
+
 FileObserver::FileObserver() { }
 FileObserver::FileObserver(std::filesystem::path config_path, uint64_t wait_millisec)
     : DirectoryStorage { config_path }
@@ -65,34 +68,8 @@ void FileObserver::initializationDirectory()
     for (const auto& projectEntry : filesystem_iteraror(DirectoryStorage::configPath())) {
 
         size_t count = DirectoryStorage::countFilesInFolder(projectEntry);
-        std::list<FileInfo> listFiles(count);
+        auto listFiles = createFolderList(projectEntry);
 
-        logger::debug("File observer: inspecting {}", projectEntry.path().c_str());
-        for (const auto& projectFile : filesystem_iteraror(projectEntry.path())) {
-            int64_t filter = fileFilter(projectFile.path().c_str());
-
-            if (filter) {
-                auto ftime = std::filesystem::last_write_time(projectFile);
-                logger::debug(" -- {} {} {}",
-                    projectFile.path().c_str(),
-                    ftime,
-                    " valid");
-                listFiles.emplace_back(FileInfo { projectFile, ftime });
-                continue;
-            }
-
-            if (filter == enumFileFilter::INVALID_FILE)
-                logger::debug(" -- {} {} {}",
-                    projectFile.path().c_str(),
-                    std::filesystem::last_write_time(projectFile),
-                    " invalid");
-
-            if (filter == enumFileFilter::COMMENTED_FILE)
-                logger::debug(" -- {} {} {}",
-                    projectFile.path().c_str(),
-                    std::filesystem::last_write_time(projectFile),
-                    " commented");
-        }
         logger::info("File observer write project information ... {}", projectEntry.path().c_str());
         DirectoryStorage::emplace_back(FolderInformation { projectEntry, listFiles });
         logger::info("File observer write project information ... complete");
@@ -111,65 +88,88 @@ void FileObserver::runningDirectory()
 
     logger::info("File observer observe directory count of folders ...");
     const auto [size, count] = DirectoryStorage::sizeAndCount();
-    if (size == count)
-    {
-        logger::info("File observer observe directory count of folders ... equal");
-    }
-    if (size > count)
-    {
-        logger::info("File observer observe directory count of folders ... less");
-
-    }
-    if (size < count)
-    {
-        logger::info("File observer observe directory count of folders ... greater");
-    }
-    /*
-    auto isFoldersListsDifferent = (DirectoryStorage::size() != DirectoryStorage::countFilesInFolder(m_configPath)) ? true : false;
-    if (isFoldersListsDifferent) {
-        logger::info("File observer observe directory count of folders ... different");
-        // todo differenciation of folders
+    if (size == count) {
+        logger::info("File observer observe directory ... equal");
+        // check inner files
         return;
     }
 
-    logger::info("File observer observe directory count of folders ... same");
+    if (size > count) {
+        logger::info("File observer observe is found deleted directories ... less");
+        for (const auto& folderInformation : DirectoryStorage::directoryList()) {
+            int32_t rc = -1;
+            auto rootFolder = folderInformation.getRootFolder();
+            auto hash = std::filesystem::hash_value(rootFolder);
+            for (const auto& projectEntry : filesystem_iteraror(DirectoryStorage::configPath())) {
+                const int rc = projectEntry.path().compare(rootFolder);
+                if (rc == 0)
+                    break;
+            }
+            if (rc != 0) {
+                DirectoryStorage::removeByHash(hash);
+            }
+            // TODO: create mechanizm to update folders
+        }
+    }
+    if (size < count) {
+        logger::info("File observer observe is found new directories ... greater");
 
-    for (const auto& projectEntry : filesystem_iteraror(DirectoryStorage::configPath())) {
+        for (const auto& projectEntry : filesystem_iteraror(DirectoryStorage::configPath())) {
+            auto pFolderInformation = findFolderInformation(projectEntry.path());
+            if (pFolderInformation == nullptr) {
+                auto listFiles = createFolderList(projectEntry);
+                logger::info("File observer add new directory ... {}", projectEntry.path().c_str());
+                DirectoryStorage::emplace_back(FolderInformation { projectEntry, listFiles });
+                logger::info("File observer add new directory ... complete");
 
-        // list of projects is empty, need initialization
-        size_t countFiles = DirectoryStorage::countFilesInFolder(projectEntry);
-        std::list<FileInfo> listFiles(countFiles);
-
-        for (const auto& projectFile : filesystem_iteraror(projectEntry.path())) {
-            std::cout << projectFile.path() << " " << std::filesystem::last_write_time(projectFile) << std::endl;
-
-            logger::warning("File observer check file ...");
-            int64_t filter = fileFilter(projectFile.path().c_str());
-
-            if (filter == enumFileFilter::INVALID_FILE)
-                logger::warning("File observer check file ... invalid file");
-
-            if (filter == enumFileFilter::COMMENTED_FILE)
-                logger::warning("File observer check file ... commented file");
-
-            if (filter) {
-                listFiles.emplace_back(FileInfo { projectFile, std::filesystem::last_write_time(projectFile) });
-                logger::info("File observer check file ... complete");
+                // TODO: create mechanizm to update folders
             }
         }
-
-        logger::debug("Count of files ... {}", listFiles.size());
-
-        m_status = enumObserverStatus::running;
-        logger::info("File observer observe directory ... initialization complete");
     }
-    */
+}
+
+auto FileObserver::createFolderList(std::filesystem::path project_path) -> std::list<FileInfo>
+{
+    using filesystem_iteraror = std::filesystem::directory_iterator;
+
+    logger::debug("File observer: inspecting ... {}", project_path.c_str());
+    size_t count = DirectoryStorage::countFilesInFolder(project_path);
+    std::list<FileInfo> listFiles;
+    listFiles.resize(count);
+
+    for (const auto& file : filesystem_iteraror(project_path)) {
+        int64_t filter = fileFilter(file.path().c_str());
+
+        if (filter == enumFileFilter::INVALID_FILE)
+            logger::debug(" -- {} {} {}",
+                file.path().c_str(),
+                std::filesystem::last_write_time(file),
+                " invalid");
+
+        if (filter == enumFileFilter::COMMENTED_FILE)
+            logger::debug(" -- {} {} {}",
+                file.path().c_str(),
+                std::filesystem::last_write_time(file),
+                " commented");
+
+        if (filter) {
+            auto ftime = std::filesystem::last_write_time(file);
+            logger::debug(" -- {} {} {}",
+                file.path().c_str(),
+                ftime,
+                " valid");
+            listFiles.emplace_back(FileInfo { file, ftime });
+        }
+    }
+    logger::debug("File observer: inspecting ... done");
+
+    return listFiles;
 }
 
 // TODO: make it faster, not critical, rewrite the function
 int64_t FileObserver::fileFilter(const std::string_view& file_path)
 {
-    if (file_path.rfind(".toml") == std::string_view::npos)
+    if (file_path.rfind(".toml") == std::string_view::npos || file_path.rfind(".oml") == std::string_view::npos)
         return enumFileFilter::INVALID_FILE;
 
     const size_t position = file_path.rfind('/');
