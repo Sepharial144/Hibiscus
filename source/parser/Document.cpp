@@ -37,17 +37,6 @@ auto Document::get() const -> const char*
 const char* Document::select(const char* selector, const Request& request, parserParam param)
 {
     lxb_status_t status;
-    /*
-        const lxb_char_t html[] = "<table>"
-                                  "<tbody>"
-                                  "<tr>"
-                                  "<td header=\"choose-this-header\">0.7</td>"
-                                  "<td header=\"ignore-this-header\">1.3</td>"
-                                  "<td header=\"ignore-this-header\">5.4</td>"
-                                  "</tr>"
-                                  "</tbody>"
-                                  "</table>";
-    */
 
     static const lxb_char_t slctrs[] = "td[header='choose-this-header']";
 

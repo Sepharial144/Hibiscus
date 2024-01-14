@@ -16,9 +16,6 @@ extern "C" {
 } /* extern "C" */
 #endif
 
-#include <functional>
-#include <stdio.h>
-
 namespace hibiscus {
 
 enum parserParam {
@@ -27,24 +24,6 @@ enum parserParam {
     children,
     value
 };
-
-template <typename T>
-struct Callback;
-
-template <typename Ret, typename... Params>
-struct Callback<Ret(Params...)> {
-    template <typename... Args>
-    static Ret callback(Args... args)
-    {
-        return func(args...);
-    }
-    static std::function<Ret(Params...)> func;
-};
-
-template <typename Ret, typename... Params>
-std::function<Ret(Params...)> Callback<Ret(Params...)>::func;
-
-typedef lxb_status_t (*callback_t)(lxb_dom_node_t*, lxb_css_selector_specificity_t*, void*);
 
 static const char* s_pValue;
 
