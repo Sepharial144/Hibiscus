@@ -1,6 +1,7 @@
 #ifndef _HIBISCUS_EXCEPTION_HPP_
 #define _HIBISCUS_EXCEPTION_HPP_
 
+#include <cstdint>
 #include <exception>
 #include <string>
 

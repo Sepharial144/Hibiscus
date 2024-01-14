@@ -1,9 +1,10 @@
+/*
 #include "Configuration.hpp"
-#include "logger/Logger.hpp"
+#include "logger/logger.hpp"
 
 #include <exception>
 
-namespace sl::config {
+namespace config {
 Configuration::Configuration() { }
 
 Configuration::Configuration(const char* config_path, const char* name)
@@ -23,18 +24,17 @@ void Configuration::setConfigurationPath(const char* config_path,
 
 void Configuration::readConfiguration()
 {
-    /*
-  std::string configPath{m_configPath};
-  if (configPath[configPath.size() - 1] != '/')
-  {
-          configPath.append("/");
-  }
-  configPath.append(m_configName);
-  */
+  //std::string configPath{m_configPath};
+  //if (configPath[configPath.size() - 1] != '/')
+  //{
+  //        configPath.append("/");
+ // }
+  //configPath.append(m_configName);
+
 
     YAML::Node node = YAML::LoadFile(m_configName);
     if (!node["starline"]) {
-        throw std::exception("There is no property starline in configuration file");
+        throw std::runtime_error("There is no property starline in configuration file");
     }
     m_config = node["starline"];
 }
@@ -61,4 +61,5 @@ resolution Configuration::getResolutionValue()
         m_config["resolution"]["height"].as<int32_t>() };
 }
 
-} // namespace sl::config
+} // namespace config
+*/

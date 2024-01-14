@@ -1,5 +1,7 @@
 #include "Client.hpp"
 
+namespace hibiscus {
+
 Client::Client()
 {
 }
@@ -16,5 +18,7 @@ void Client::setSettings(const char* port, const char* source)
 
 std::string Client::invoke()
 {
-    std::string
+    return std::string { "invoke" };
 }
+
+} // namespace hibiscus

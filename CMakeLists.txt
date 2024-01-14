@@ -12,7 +12,7 @@ include(config.cmake)
 
 message(STATUS "Package libraries: ${PACKAGE_LIBRARIES}")
 
-file(GLOB HIBISCUS_SRC_FILES "source/*.hpp" "source/*.cpp")
+file(GLOB_RECURSE HIBISCUS_SRC_FILES "source/*.hpp" "source/*.cpp")
 
 add_executable(hibiscus ${HIBISCUS_SRC_FILES})
 

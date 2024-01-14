@@ -1,3 +1,4 @@
+/*
 #ifndef _HIBISCUS_CONFIGURATION_HPP_
 #define _HIBISCUS_CONFIGURATION_HPP_
 
@@ -48,3 +49,4 @@ auto Configuration::getValue(const char* property) -> TypeValue
 } // namespace config
 
 #endif // !_HIBISCUS_CONFIGURATION_HPP_
+*/
