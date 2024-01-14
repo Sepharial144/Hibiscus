@@ -3,9 +3,17 @@
 
 #include "Hibicus_definitions.hpp"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <lexbor/css/css.h>
 #include <lexbor/html/html.h>
 #include <lexbor/selectors/selectors.h>
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #include <cstring>
 
